@@ -9,11 +9,22 @@ using System.Text;
 public partial class main : Control
 {
     private Camera2D camera;
-    private FileDialog dialog;
+    private FileDialog errorDialog;
     private FileDialog openDialog;
     private FileDialog saveDialog;
+
+    
+
+    private Label iterationsLabel;
+
     private Timer timer;
+
     private Control hud;
+    private SpinBox iterations;
+    private Button singleButton;
+    private Button playButton;
+    private Button openButton;
+    private Button saveButton;
 
     private const string HEADER = "#Life 1.06";
 
@@ -43,16 +54,21 @@ public partial class main : Control
 
     [Signal]
     public delegate void UpdateCellEventHandler(Int64 x, Int64 y, bool isAlive);
+    [Signal]
+    public delegate void ClearWorldEventHandler();
 
- 
 
-	public override void _Ready()
+
+    public override void _Ready()
 	{
         camera = GetNode<Camera2D>("Camera");
         //Get File Dialog stuff
-
+        
         timer = GetNode<Timer>("Timer");
         hud = camera.GetNode<Control>("Control");
+        openDialog = hud.GetNode<FileDialog>("OpenFile");
+        saveDialog = hud.GetNode<FileDialog>("SaveFile");
+        errorDialog = hud.GetNode<FileDialog>("ErrorDialog");
     }
 
     public override void _UnhandledInput(InputEvent @event)//likely move this to diff area
@@ -207,6 +223,7 @@ public partial class main : Control
     public void _on_file_dialog_file_selected(string fileDir)//calls our needed funtions when we are processing 
     {
         aliveCells.Clear();
+        EmitSignal("ClearWorld");
         //update ui
         try
         {
@@ -229,11 +246,22 @@ public partial class main : Control
         } 
         catch (Exception e)
         {
-            
+            errorDialog.Title = e.Message;
+            errorDialog.Show();
         }
     }
 
     public void _on_save_file_file_selected(string fileDir)
+    {
+
+    }
+
+    public void _on_play_pressed()
+    {
+
+    }
+
+    public void _on_step_pressed()
     {
 
     }
