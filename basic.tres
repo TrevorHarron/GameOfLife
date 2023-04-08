@@ -1,0 +1,16 @@
+[gd_resource type="TileSet" load_steps=4 format=3 uid="uid://be54ol2ukcgvu"]
+
+[ext_resource type="Texture2D" uid="uid://bgxc46t3s2lyl" path="res://alive-cell.png" id="1_eeomx"]
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_e3vrv"]
+resource_name = "alive"
+texture = ExtResource("1_eeomx")
+0:0/0 = 0
+
+[sub_resource type="TileSetAtlasSource" id="TileSetAtlasSource_mq43u"]
+resource_name = "dead"
+use_texture_padding = false
+
+[resource]
+sources/0 = SubResource("TileSetAtlasSource_e3vrv")
+sources/1 = SubResource("TileSetAtlasSource_mq43u")
