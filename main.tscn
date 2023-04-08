@@ -9,74 +9,6 @@ script = ExtResource("1_usk01")
 
 [node name="Camera" type="Camera2D" parent="."]
 
-[node name="OpenFile" type="FileDialog" parent="Camera"]
-title = "Open a File"
-size = Vector2i(392, 162)
-ok_button_text = "Open"
-dialog_text = "Choose the initial Alive Cells"
-file_mode = 0
-access = 2
-filters = PackedStringArray("")
-
-[node name="SaveFile" type="FileDialog" parent="Camera"]
-size = Vector2i(392, 162)
-access = 2
-
-[node name="Step" type="Button" parent="Camera"]
-anchors_preset = -1
-anchor_left = 0.00952381
-anchor_top = 0.930341
-anchor_right = 0.0753247
-anchor_bottom = 0.978328
-offset_left = -564.0
-offset_top = 281.0
-offset_right = -471.0
-offset_bottom = 312.0
-text = "Single Step
-"
-
-[node name="Play" type="Button" parent="Camera"]
-anchors_preset = -1
-anchor_left = 0.100433
-anchor_top = 0.930341
-anchor_right = 0.180952
-anchor_bottom = 0.978328
-offset_left = -459.0
-offset_top = 281.0
-offset_right = -377.0
-offset_bottom = 312.0
-text = "Play/Stop"
-
-[node name="PlayingStop" type="Label" parent="Camera"]
-offset_left = -575.0
-offset_top = -320.0
-offset_right = -460.0
-offset_bottom = -297.0
-
-[node name="TimerSpeed" type="HSlider" parent="Camera"]
-offset_left = -350.0
-offset_top = 290.0
-offset_right = -264.0
-offset_bottom = 306.0
-min_value = 1.0
-max_value = 10.0
-value = 1.0
-
-[node name="PlayingStop2" type="Label" parent="Camera"]
-offset_left = -337.0
-offset_top = 265.0
-offset_right = -222.0
-offset_bottom = 291.0
-text = "Ticks/Sec: "
-
-[node name="SpinBox" type="SpinBox" parent="Camera"]
-offset_left = -456.0
-offset_top = 235.0
-offset_right = -372.938
-offset_bottom = 266.0
-min_value = 1.0
-value = 1.0
-
 [node name="Control" type="Control" parent="Camera"]
 layout_mode = 3
 anchors_preset = 8
@@ -94,7 +26,96 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 mouse_filter = 1
 
-[node name="Error" type="AcceptDialog" parent="Camera"]
+[node name="Panel" type="Panel" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = 15
+anchor_right = 1.0
+anchor_bottom = 1.0
+grow_horizontal = 2
+grow_vertical = 2
+
+[node name="SaveFile" type="FileDialog" parent="Camera/Control"]
+size = Vector2i(452, 162)
+access = 2
+
+[node name="Step" type="Button" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.00952381
+anchor_top = 0.930341
+anchor_right = 0.0753247
+anchor_bottom = 0.978328
+offset_top = -1.00031
+offset_right = 17.0
+offset_bottom = 7.00012
+text = "Single Step
+"
+
+[node name="PlayingStop" type="Label" parent="Camera/Control"]
+offset_left = -5.0
+offset_top = 392.0
+offset_right = 110.0
+offset_bottom = 415.0
+
+[node name="Ts" type="Label" parent="Camera/Control"]
+offset_left = 254.0
+offset_top = 586.0
+offset_right = 338.0
+offset_bottom = 612.0
+text = "Ticks/Sec: "
+
+[node name="TimerSpeed" type="HSlider" parent="Camera/Control"]
+offset_left = 250.0
+offset_top = 617.0
+offset_right = 348.0
+offset_bottom = 633.0
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+
+[node name="Play" type="Button" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.297835
+anchor_top = 0.930341
+anchor_right = 0.4
+anchor_bottom = 0.986068
+offset_left = -226.0
+offset_right = -226.0
+text = "Play/Stop"
+metadata/_edit_use_anchors_ = true
+
+[node name="SpinBox" type="SpinBox" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.308225
+anchor_top = 0.869969
+anchor_right = 0.380141
+anchor_bottom = 0.917957
+offset_left = -226.0
+offset_right = -226.0
+min_value = 1.0
+value = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="OpenFile" type="FileDialog" parent="Camera/Control"]
+title = "Open a File"
+size = Vector2i(392, 162)
+ok_button_text = "Open"
+dialog_text = "Choose the initial Alive Cells"
+file_mode = 0
+access = 2
+filters = PackedStringArray("")
+
+[node name="Label" type="Label" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.367965
+anchor_top = 0.312693
+anchor_right = 0.631169
+anchor_bottom = 0.397833
+text = "Conway's Game of Life Implementation"
+metadata/_edit_use_anchors_ = true
 
 [node name="World" type="TileMap" parent="."]
 tile_set = ExtResource("1_40w0q")
@@ -107,7 +128,8 @@ script = ExtResource("3_8l552")
 
 [node name="Timer" type="Timer" parent="."]
 
-[connection signal="UpdateCell" from="." to="World" method="_on_main_update_cell"]
-[connection signal="file_selected" from="Camera/OpenFile" to="." method="_on_file_dialog_file_selected"]
-[connection signal="file_selected" from="Camera/SaveFile" to="." method="_on_save_file_file_selected"]
+[connection signal="file_selected" from="Camera/Control/SaveFile" to="." method="_on_save_file_file_selected"]
+[connection signal="pressed" from="Camera/Control/Step" to="." method="_on_step_pressed"]
+[connection signal="pressed" from="Camera/Control/Play" to="." method="_on_play_pressed"]
+[connection signal="file_selected" from="Camera/Control/OpenFile" to="." method="_on_file_dialog_file_selected"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
