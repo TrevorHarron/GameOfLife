@@ -6,14 +6,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-public partial class main : Control
+public partial class main : Node2D
 {
     private Camera2D camera;
     private FileDialog errorDialog;
     private FileDialog openDialog;
     private FileDialog saveDialog;
-
-    
 
     private Label iterationsLabel;
 
@@ -26,7 +24,14 @@ public partial class main : Control
     private Button openButton;
     private Button saveButton;
 
+    private TextEdit output;
+
     private const string HEADER = "#Life 1.06";
+    private const byte ALIVE_MASK = 16;
+    private const byte NUM_MASK = 15;
+
+    private int playCount = 0;
+    private int stepsRun = 10;
 
     private struct Cell
     {
@@ -43,8 +48,7 @@ public partial class main : Control
         }
     }
 
-    private System.Collections.Generic.Dictionary<Cell, int> cellCounts = new System.Collections.Generic.Dictionary<Cell, int>();
-    private System.Collections.Generic.Dictionary<Cell, bool> aliveCells = new System.Collections.Generic.Dictionary<Cell, bool>();
+    private System.Collections.Generic.Dictionary<Cell, byte> cellData = new System.Collections.Generic.Dictionary<Cell, byte>();
 
     private const float ZOOM_FACTOR = 0.2f;
     private float zoom = 0.01f;
@@ -69,6 +73,8 @@ public partial class main : Control
         openDialog = hud.GetNode<FileDialog>("OpenFile");
         saveDialog = hud.GetNode<FileDialog>("SaveFile");
         errorDialog = hud.GetNode<FileDialog>("ErrorDialog");
+        playButton = hud.GetNode<Button>("Play");
+        output = hud.GetNode<TextEdit>("Output");
     }
 
     public override void _UnhandledInput(InputEvent @event)//likely move this to diff area
@@ -132,7 +138,6 @@ public partial class main : Control
 
     private void CalculateCells(ICollection<Cell> _cells)
     {
-        ulong n = (ulong)_cells.Count;
         foreach (Cell cell in _cells)
         {
             foreach(Vector2I dir in directions)
@@ -140,13 +145,13 @@ public partial class main : Control
                 Cell c;
                 c.X = IncrementByValue(cell.X, (Int64)dir.X);
                 c.Y = IncrementByValue(cell.Y, (Int64)dir.Y);
-                if (cellCounts.ContainsKey(c))
+                if (cellData.ContainsKey(c) && (cellData[c] & NUM_MASK) < 4)
                 {
-                    cellCounts[c]++;
+                    cellData[c]++;
                 }
                 else
                 {
-                    cellCounts.Add(c,1);
+                    cellData.Add(c,1);
                 }
             }
         }
@@ -170,32 +175,31 @@ public partial class main : Control
     {
         //use the cellCounts
         
-        foreach(Cell cell in cellCounts.Keys)
+        foreach(Cell cell in cellData.Keys)
         {
-            if (cellCounts[cell] <= 1)
+            bool wAlive = (cellData[cell] & ALIVE_MASK) != 0;
+            byte count = (byte)(cellData[cell] & NUM_MASK);
+            if (count <= 1)
             {
-                if (aliveCells.ContainsKey(cell))
+                cellData.Remove(cell);
+            }
+            else if (cellData[cell] >= 4)
+            {
+                if (cellData.ContainsKey(cell))
                 {
-                    aliveCells.Remove(cell);
+                    cellData.Remove(cell);
                 }
             }
-            else if (cellCounts[cell] >= 4)
+            else if (count == 2 && wAlive)
             {
-                if (aliveCells.ContainsKey(cell))
-                {
-                    aliveCells.Remove(cell);
-                }
+                cellData.TryAdd(cell, ALIVE_MASK);
             }
-            else if (cellCounts[cell] == 2 && aliveCells.ContainsKey(cell))
+            else if (count == 3)
             {
-                aliveCells.TryAdd(cell, true);
-            }
-            else if (cellCounts[cell] == 3)
-            {
-                aliveCells.TryAdd(cell, true);
+                cellData[cell] =  ALIVE_MASK;
                
             }
-            EmitSignal("UpdateCell",cell.X,cell.Y, aliveCells.GetValueOrDefault(cell));
+            EmitSignal("UpdateCell",cell.X,cell.Y, cellData.ContainsKey(cell));
         }
     }
 
@@ -207,29 +211,49 @@ public partial class main : Control
 
     private void UpdateAllCells()
     {
-        cellCounts.Clear();
-        foreach(KeyValuePair<Cell,bool> kv in aliveCells) {
-            cellCounts.Add(kv.Key,0);
-        }
-        CalculateCells(aliveCells.Keys);
+        //foreach(KeyValuePair<Cell,byte> kv in cellData) {
+            //GD.Print(kv.Key, kv.Value);
+            //cellData.TryAdd(kv.Key,ALIVE_MASK);
+        //}
+        CalculateCells(cellData.Keys);
         UpdateWorld();
     }
 
     public void _on_timer_timeout()//calls our needed funtions when we are processing 
 	{
-        UpdateAllCells();
+        if(stepsRun < 0 || playCount < stepsRun)
+        {
+            ++playCount;
+            UpdateAllCells();
+        }
+        if(playCount >= stepsRun && stepsRun >= 0)
+        {
+
+            timer.Paused = true;
+            timer.Stop();
+            output.Text = printAliveCells();
+            playButton.Disabled = false;
+
+            saveButton.Disabled = false;
+        }
+        
 	}
 
     public void _on_file_dialog_file_selected(string fileDir)//calls our needed funtions when we are processing 
     {
-        aliveCells.Clear();
+        cellData.Clear();
         EmitSignal("ClearWorld");
         //update ui
         try
         {
             using (StreamReader file = new StreamReader(fileDir))
             {
-                file.ReadLine();//reading the header
+                string h =file.ReadLine();//reading the header
+                GD.Print(h);
+                if(!h.Equals(HEADER))
+                {
+                    throw new Exception("Not in Life 1.06 Format");
+                }
                 string ln;
                 
                 while ((ln = file.ReadLine()) != null)
@@ -239,9 +263,11 @@ public partial class main : Control
                     Cell c;
                     c.X = Convert.ToInt64(items[0]);
                     c.Y = Convert.ToInt64(items[1]);
-                    aliveCells.Add(c, true);
+                    GD.Print(c.ToString());
+                    cellData.Add(c, ALIVE_MASK);
                 }
                 file.Close();
+                GD.Print("Done Loading");
             }
         } 
         catch (Exception e)
@@ -256,23 +282,54 @@ public partial class main : Control
 
     }
 
+    public void _on_load_input_pressed()
+    {
+        openDialog.Show();
+    }
+
     public void _on_play_pressed()
     {
-
+        playCount = 0;
+        timer.Paused = false;
+        playButton.Disabled = true;
+        saveButton.Disabled = true;
+        timer.Start();
     }
 
     public void _on_step_pressed()
     {
+        playCount += 1;
+        UpdateAllCells();
+        output.Text = printAliveCells();
+    }
 
+    public void _on_steps_sec_value_changed(float stepPerSec)
+    {
+        if (stepPerSec > 0)
+        {
+            timer.WaitTime = 1.0f/stepPerSec;
+        }
+    }
+
+    public void _on_num_steps_value_changed(float numSteps)
+    {
+        if (numSteps > 0)
+        {
+            stepsRun = (int)numSteps;
+        }
     }
 
     private string printAliveCells()
     {
         StringBuilder sb = new StringBuilder();
         sb.AppendLine(HEADER);
-        foreach(Cell c in aliveCells.Keys)
+        foreach(Cell c in cellData.Keys)
         {
-            sb.Append(c.ToString());
+            if ((cellData[c]&ALIVE_MASK) != 0)
+            {
+                sb.Append(c.ToString());
+            }
+            
         }
         return sb.ToString();
     }

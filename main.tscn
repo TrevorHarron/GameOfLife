@@ -41,15 +41,13 @@ access = 2
 [node name="Step" type="Button" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.00952381
-anchor_top = 0.930341
-anchor_right = 0.0753247
-anchor_bottom = 0.978328
-offset_top = -1.00031
-offset_right = 17.0
-offset_bottom = 7.00012
+anchor_left = 0.458874
+anchor_top = 0.760062
+anchor_right = 0.539394
+anchor_bottom = 0.820433
 text = "Single Step
 "
+metadata/_edit_use_anchors_ = true
 
 [node name="PlayingStop" type="Label" parent="Camera/Control"]
 offset_left = -5.0
@@ -57,45 +55,65 @@ offset_top = 392.0
 offset_right = 110.0
 offset_bottom = 415.0
 
-[node name="Ts" type="Label" parent="Camera/Control"]
-offset_left = 254.0
-offset_top = 586.0
-offset_right = 338.0
-offset_bottom = 612.0
-text = "Ticks/Sec: "
-
-[node name="TimerSpeed" type="HSlider" parent="Camera/Control"]
-offset_left = 250.0
-offset_top = 617.0
-offset_right = 348.0
-offset_bottom = 633.0
-min_value = 1.0
-max_value = 10.0
-value = 1.0
-
 [node name="Play" type="Button" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.297835
-anchor_top = 0.930341
-anchor_right = 0.4
-anchor_bottom = 0.986068
-offset_left = -226.0
-offset_right = -226.0
-text = "Play/Stop"
+anchor_left = 0.445887
+anchor_top = 0.695046
+anchor_right = 0.548052
+anchor_bottom = 0.750774
+text = "Play"
 metadata/_edit_use_anchors_ = true
 
-[node name="SpinBox" type="SpinBox" parent="Camera/Control"]
+[node name="StepsSec" type="SpinBox" parent="Camera/Control"]
+visible = false
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.308225
-anchor_top = 0.869969
-anchor_right = 0.380141
-anchor_bottom = 0.917957
-offset_left = -226.0
-offset_right = -226.0
+anchor_left = -1.84763
+anchor_top = -0.0399982
+anchor_right = -1.77571
+anchor_bottom = 0.0141813
+offset_left = 2178.01
+offset_top = 621.839
+offset_right = 2178.01
+offset_bottom = 621.839
+min_value = 1.0
+max_value = 10.0
+value = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Ts" type="Label" parent="Camera/Control/StepsSec"]
+offset_left = -3.0
+offset_top = -30.0
+offset_right = 81.0
+offset_bottom = -4.0
+text = "Steps/Sec: "
+metadata/_edit_use_anchors_ = true
+
+[node name="NumSteps" type="SpinBox" parent="Camera/Control"]
+visible = false
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.167965
+anchor_top = 0.928793
+anchor_right = 0.239881
+anchor_bottom = 0.97678
 min_value = 1.0
 value = 1.0
+metadata/_edit_use_anchors_ = true
+
+[node name="Label2" type="Label" parent="Camera/Control/NumSteps"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.333333
+anchor_top = 0.883901
+anchor_right = 0.446753
+anchor_bottom = 0.924149
+offset_left = -52.6875
+offset_top = -58.4009
+offset_right = 68.8916
+offset_bottom = -33.6486
+text = "Number of Steps"
 metadata/_edit_use_anchors_ = true
 
 [node name="OpenFile" type="FileDialog" parent="Camera/Control"]
@@ -110,11 +128,58 @@ filters = PackedStringArray("")
 [node name="Label" type="Label" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
-anchor_left = 0.367965
-anchor_top = 0.312693
-anchor_right = 0.631169
-anchor_bottom = 0.397833
+anchor_left = 0.370563
+anchor_top = 0.0108359
+anchor_right = 0.633766
+anchor_bottom = 0.0959752
 text = "Conway's Game of Life Implementation"
+metadata/_edit_use_anchors_ = true
+
+[node name="LoadInput" type="Button" parent="Camera/Control"]
+layout_mode = 0
+offset_left = 514.0
+offset_top = 586.0
+offset_right = 637.0
+offset_bottom = 617.0
+text = "Load Input File"
+
+[node name="InputFile" type="Label" parent="Camera/Control/LoadInput"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = -0.479675
+anchor_top = -0.903226
+anchor_right = 1.4878
+anchor_bottom = -0.0645161
+text = "load a file!"
+horizontal_alignment = 1
+metadata/_edit_use_anchors_ = true
+
+[node name="InputLabel" type="Label" parent="Camera/Control"]
+layout_mode = 0
+offset_left = 53.0
+offset_top = 107.0
+offset_right = 212.0
+offset_bottom = 133.0
+text = "Input Text"
+
+[node name="Input" type="TextEdit" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.04329
+anchor_top = 0.198142
+anchor_right = 0.191342
+anchor_bottom = 0.687307
+editable = false
+metadata/_edit_use_anchors_ = true
+
+[node name="Output" type="TextEdit" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.273593
+anchor_top = 0.193498
+anchor_right = 0.71342
+anchor_bottom = 0.682663
+editable = false
 metadata/_edit_use_anchors_ = true
 
 [node name="World" type="TileMap" parent="."]
@@ -131,5 +196,8 @@ script = ExtResource("3_8l552")
 [connection signal="file_selected" from="Camera/Control/SaveFile" to="." method="_on_save_file_file_selected"]
 [connection signal="pressed" from="Camera/Control/Step" to="." method="_on_step_pressed"]
 [connection signal="pressed" from="Camera/Control/Play" to="." method="_on_play_pressed"]
+[connection signal="value_changed" from="Camera/Control/StepsSec" to="." method="_on_steps_sec_value_changed"]
+[connection signal="value_changed" from="Camera/Control/NumSteps" to="." method="_on_num_steps_value_changed"]
 [connection signal="file_selected" from="Camera/Control/OpenFile" to="." method="_on_file_dialog_file_selected"]
+[connection signal="pressed" from="Camera/Control/LoadInput" to="." method="_on_load_input_pressed"]
 [connection signal="timeout" from="Timer" to="." method="_on_timer_timeout"]
