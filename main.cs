@@ -9,7 +9,7 @@ using System.Text;
 public partial class main : Node2D
 {
     private Camera2D camera;
-    private FileDialog errorDialog;
+    private AcceptDialog errorDialog;
     private FileDialog openDialog;
     private FileDialog saveDialog;
 
@@ -25,6 +25,7 @@ public partial class main : Node2D
     private Button saveButton;
 
     private TextEdit output;
+    private TextEdit input;
 
     private const string HEADER = "#Life 1.06";
     private const byte ALIVE_MASK = 16;
@@ -72,9 +73,10 @@ public partial class main : Node2D
         hud = camera.GetNode<Control>("Control");
         openDialog = hud.GetNode<FileDialog>("OpenFile");
         saveDialog = hud.GetNode<FileDialog>("SaveFile");
-        errorDialog = hud.GetNode<FileDialog>("ErrorDialog");
+        errorDialog = hud.GetNode<AcceptDialog>("ErrorDialog");
         playButton = hud.GetNode<Button>("Play");
         output = hud.GetNode<TextEdit>("Output");
+        input = hud.GetNode<TextEdit>("Input");
     }
 
     public override void _UnhandledInput(InputEvent @event)//likely move this to diff area
@@ -136,7 +138,7 @@ public partial class main : Node2D
         base._UnhandledInput(@event);
     }
 
-    private void CalculateCells(ICollection<Cell> _cells)
+    private void CalculateCells(List<Cell> _cells)
     {
         foreach (Cell cell in _cells)
         {
@@ -145,12 +147,18 @@ public partial class main : Node2D
                 Cell c;
                 c.X = IncrementByValue(cell.X, (Int64)dir.X);
                 c.Y = IncrementByValue(cell.Y, (Int64)dir.Y);
-                if (cellData.ContainsKey(c) && (cellData[c] & NUM_MASK) < 4)
+                if (cellData.ContainsKey(c))
                 {
-                    cellData[c]++;
+                    byte count = (byte)(cellData[c] & NUM_MASK);
+                    if(count < 4) {
+                        cellData[c] = (byte)(cellData[c] + 1);
+                        GD.Print("incremented value");
+                    }
+                    
                 }
                 else
                 {
+                    GD.Print("new value");
                     cellData.Add(c,1);
                 }
             }
@@ -174,32 +182,50 @@ public partial class main : Node2D
     private void UpdateWorld()
     {
         //use the cellCounts
-        
-        foreach(Cell cell in cellData.Keys)
+        var keys = cellData.Keys;
+        foreach (Cell cell in keys)
         {
             bool wAlive = (cellData[cell] & ALIVE_MASK) != 0;
             byte count = (byte)(cellData[cell] & NUM_MASK);
+            GD.Print(cell +" data "+ cellData[cell] + " Alive " + wAlive + " count " + count+ "\n");
             if (count <= 1)
             {
                 cellData.Remove(cell);
             }
-            else if (cellData[cell] >= 4)
+            else if (count >= 4)
             {
                 if (cellData.ContainsKey(cell))
                 {
                     cellData.Remove(cell);
                 }
             }
-            else if (count == 2 && wAlive)
+            else if (count == 2 )
             {
-                cellData.TryAdd(cell, ALIVE_MASK);
+                if (wAlive)
+                {
+                    cellData[cell] = ALIVE_MASK;
+                }
+                else
+                {
+                    cellData.Remove(cell);
+                }
             }
             else if (count == 3)
             {
                 cellData[cell] =  ALIVE_MASK;
-               
             }
             EmitSignal("UpdateCell",cell.X,cell.Y, cellData.ContainsKey(cell));
+        }
+        foreach (Cell cell in keys)
+        {
+            if(cellData.ContainsKey(cell))
+            {
+                GD.Print(cellData[cell]);
+            }
+            else
+            {
+                GD.Print("old data");
+            }
         }
     }
 
@@ -215,7 +241,7 @@ public partial class main : Node2D
             //GD.Print(kv.Key, kv.Value);
             //cellData.TryAdd(kv.Key,ALIVE_MASK);
         //}
-        CalculateCells(cellData.Keys);
+        CalculateCells(cellData.Keys.ToList<Cell>());
         UpdateWorld();
     }
 
@@ -248,7 +274,10 @@ public partial class main : Node2D
         {
             using (StreamReader file = new StreamReader(fileDir))
             {
+                StringBuilder sb = new StringBuilder();
+                
                 string h =file.ReadLine();//reading the header
+                sb.AppendLine(h);
                 GD.Print(h);
                 if(!h.Equals(HEADER))
                 {
@@ -263,10 +292,13 @@ public partial class main : Node2D
                     Cell c;
                     c.X = Convert.ToInt64(items[0]);
                     c.Y = Convert.ToInt64(items[1]);
+                    sb.AppendLine(c.ToString());
                     GD.Print(c.ToString());
                     cellData.Add(c, ALIVE_MASK);
                 }
                 file.Close();
+
+                input.Text = sb.ToString();
                 GD.Print("Done Loading");
             }
         } 
@@ -327,7 +359,7 @@ public partial class main : Node2D
         {
             if ((cellData[c]&ALIVE_MASK) != 0)
             {
-                sb.Append(c.ToString());
+                sb.AppendLine(c.ToString());
             }
             
         }

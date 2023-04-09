@@ -125,6 +125,8 @@ file_mode = 0
 access = 2
 filters = PackedStringArray("")
 
+[node name="ErrorDialog" type="AcceptDialog" parent="Camera/Control"]
+
 [node name="Label" type="Label" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
