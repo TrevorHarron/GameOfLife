@@ -13,7 +13,7 @@ public partial class main : Node2D
     private FileDialog openDialog;
     private FileDialog saveDialog;
 
-    private Label iterationsLabel;
+    private Label tickNumberLabel;
 
     private Timer timer;
 
@@ -32,7 +32,7 @@ public partial class main : Node2D
     private const byte NUM_MASK = 15;
 
     private int playCount = 0;
-    private int stepsRun = 10;
+    private int stepsToRun = 10;
 
     private struct Cell
     {
@@ -77,6 +77,7 @@ public partial class main : Node2D
         playButton = hud.GetNode<Button>("Play");
         output = hud.GetNode<TextEdit>("Output");
         input = hud.GetNode<TextEdit>("Input");
+        tickNumberLabel = hud.GetNode<Label>("TickNumber");
     }
 
     public override void _UnhandledInput(InputEvent @event)//likely move this to diff area
@@ -247,19 +248,21 @@ public partial class main : Node2D
 
     public void _on_timer_timeout()//calls our needed funtions when we are processing 
 	{
-        if(stepsRun < 0 || playCount < stepsRun)
+        GD.Print("Timer tick: " + stepsToRun + " " + playCount);
+        if(stepsToRun < 0 || playCount < stepsToRun)
         {
-            ++playCount;
+           
             UpdateAllCells();
+            ++playCount;
         }
-        if(playCount >= stepsRun && stepsRun >= 0)
+        tickNumberLabel.Text = "" + playCount;
+        if (playCount >= stepsToRun && stepsToRun >= 0)
         {
 
             timer.Paused = true;
             timer.Stop();
             output.Text = printAliveCells();
             playButton.Disabled = false;
-
             saveButton.Disabled = false;
         }
         
@@ -272,6 +275,10 @@ public partial class main : Node2D
         //update ui
         try
         {
+            string ext = fileDir.Split('.').Last();
+            if(String.IsNullOrEmpty(ext) || !(ext.Match("txt",false) ||ext.Match("life") || ext.Match("lif"))){
+                throw new Exception("invlaid file type");
+            }
             using (StreamReader file = new StreamReader(fileDir))
             {
                 StringBuilder sb = new StringBuilder();
@@ -347,7 +354,7 @@ public partial class main : Node2D
     {
         if (numSteps > 0)
         {
-            stepsRun = (int)numSteps;
+            stepsToRun = (int)numSteps;
         }
     }
 
