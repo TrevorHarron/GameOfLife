@@ -55,7 +55,7 @@ offset_top = 392.0
 offset_right = 110.0
 offset_bottom = 415.0
 
-[node name="Play" type="Button" parent="Camera/Control"]
+[node name="PlayButton" type="Button" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.445887
@@ -168,6 +168,17 @@ text = "load a file!"
 horizontal_alignment = 1
 metadata/_edit_use_anchors_ = true
 
+[node name="SaveOutput" type="Button" parent="Camera/Control"]
+visible = false
+layout_mode = 0
+anchor_left = 0.720346
+anchor_top = 0.631579
+anchor_right = 0.837229
+anchor_bottom = 0.679567
+offset_top = 3.05176e-05
+text = "Save Output File"
+metadata/_edit_use_anchors_ = true
+
 [node name="InputLabel" type="Label" parent="Camera/Control"]
 layout_mode = 0
 offset_left = 53.0
@@ -217,7 +228,7 @@ wait_time = 0.5
 
 [connection signal="file_selected" from="Camera/Control/SaveFile" to="." method="_on_save_file_file_selected"]
 [connection signal="pressed" from="Camera/Control/Step" to="." method="_on_step_pressed"]
-[connection signal="pressed" from="Camera/Control/Play" to="." method="_on_play_pressed"]
+[connection signal="pressed" from="Camera/Control/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="value_changed" from="Camera/Control/StepsSec" to="." method="_on_steps_sec_value_changed"]
 [connection signal="value_changed" from="Camera/Control/NumSteps" to="." method="_on_num_steps_value_changed"]
 [connection signal="file_selected" from="Camera/Control/OpenFile" to="." method="_on_file_dialog_file_selected"]

@@ -74,7 +74,8 @@ public partial class main : Node2D
         openDialog = hud.GetNode<FileDialog>("OpenFile");
         saveDialog = hud.GetNode<FileDialog>("SaveFile");
         errorDialog = hud.GetNode<AcceptDialog>("ErrorDialog");
-        playButton = hud.GetNode<Button>("Play");
+        playButton = hud.GetNode<Button>("PlayButton");
+        saveButton = hud.GetNode<Button>("SaveOutput");
         output = hud.GetNode<TextEdit>("Output");
         input = hud.GetNode<TextEdit>("Input");
         tickNumberLabel = hud.GetNode<Label>("TickNumber");
@@ -153,13 +154,13 @@ public partial class main : Node2D
                     byte count = (byte)(cellData[c] & NUM_MASK);
                     if(count < 4) {
                         cellData[c] = (byte)(cellData[c] + 1);
-                        GD.Print("incremented value");
+                        //GD.Print("incremented value");
                     }
                     
                 }
                 else
                 {
-                    GD.Print("new value");
+                    //GD.Print("new value");
                     cellData.Add(c,1);
                 }
             }
@@ -188,7 +189,7 @@ public partial class main : Node2D
         {
             bool wAlive = (cellData[cell] & ALIVE_MASK) != 0;
             byte count = (byte)(cellData[cell] & NUM_MASK);
-            GD.Print(cell +" data "+ cellData[cell] + " Alive " + wAlive + " count " + count+ "\n");
+            //GD.Print(cell +" data "+ cellData[cell] + " Alive " + wAlive + " count " + count+ "\n");
             if (count <= 1)
             {
                 cellData.Remove(cell);
@@ -217,17 +218,7 @@ public partial class main : Node2D
             }
             EmitSignal("UpdateCell",cell.X,cell.Y, cellData.ContainsKey(cell));
         }
-        foreach (Cell cell in keys)
-        {
-            if(cellData.ContainsKey(cell))
-            {
-                GD.Print(cellData[cell]);
-            }
-            else
-            {
-                GD.Print("old data");
-            }
-        }
+       
     }
 
     private Vector2 GetGridPos(Vector2 pos)
@@ -248,7 +239,7 @@ public partial class main : Node2D
 
     public void _on_timer_timeout()//calls our needed funtions when we are processing 
 	{
-        GD.Print("Timer tick: " + stepsToRun + " " + playCount);
+       // GD.Print("Timer tick: " + stepsToRun + " " + playCount);
         if(stepsToRun < 0 || playCount < stepsToRun)
         {
            
@@ -258,15 +249,14 @@ public partial class main : Node2D
         tickNumberLabel.Text = "" + playCount;
         if (playCount >= stepsToRun && stepsToRun >= 0)
         {
-
             timer.Paused = true;
             timer.Stop();
-            output.Text = printAliveCells();
             playButton.Disabled = false;
             saveButton.Disabled = false;
         }
-        
-	}
+        output.Text = printAliveCells();
+
+    }
 
     public void _on_file_dialog_file_selected(string fileDir)//calls our needed funtions when we are processing 
     {
@@ -300,13 +290,13 @@ public partial class main : Node2D
                     c.X = Convert.ToInt64(items[0]);
                     c.Y = Convert.ToInt64(items[1]);
                     sb.AppendLine(c.ToString());
-                    GD.Print(c.ToString());
+                    //GD.Print(c.ToString());
                     cellData.Add(c, ALIVE_MASK);
                 }
                 file.Close();
 
                 input.Text = sb.ToString();
-                GD.Print("Done Loading");
+               // GD.Print("Done Loading");
             }
         } 
         catch (Exception e)
