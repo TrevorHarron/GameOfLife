@@ -21,8 +21,12 @@ public partial class main : Node2D
     private SpinBox iterations;
     private Button singleButton;
     private Button playButton;
+    private Button stopButton;
     private Button openButton;
     private Button saveButton;
+
+    private SpinBox tickPSec;
+    private SpinBox iterationsBox;
 
     private TextEdit output;
     private TextEdit input;
@@ -71,6 +75,7 @@ public partial class main : Node2D
         //Get File Dialog stuff
         
         timer = GetNode<Timer>("Timer");
+        timer.Stop();
         hud = camera.GetNode<Control>("Control");
         openDialog = hud.GetNode<FileDialog>("OpenFile");
         saveDialog = hud.GetNode<FileDialog>("SaveFile");
@@ -80,19 +85,19 @@ public partial class main : Node2D
         output = hud.GetNode<TextEdit>("Output");
         input = hud.GetNode<TextEdit>("Input");
         tickNumberLabel = hud.GetNode<Label>("TickNumber");
+
+        iterationsBox = hud.GetNode<SpinBox>("NumSteps");
+        tickPSec = hud.GetNode<SpinBox>("StepsSec");
     }
 
     public override void _UnhandledInput(InputEvent @event)//likely move this to diff area
     {
-        if (true)//replace with better error
-        {
-            return;
-        }
-        /*if(@event is InputEventMouseButton)
+        
+        if (@event is InputEventMouseButton)
         {
             Vector2 mousePos = GetGlobalMousePosition();
-            
-            if (Input.IsActionPressed("zoom_in"))
+
+            /*if (Input.IsActionPressed("zoom_in"))
             {
                 zoom = Mathf.Clamp(zoom - ZOOM_FACTOR, 0.4f, 4.0f);
               
@@ -103,22 +108,32 @@ public partial class main : Node2D
                 zoom = Mathf.Clamp(zoom + ZOOM_FACTOR, 0.4f, 4.0f);
                 camera.Zoom = new Vector2(zoom, zoom);
             }
-            else if (Input.IsActionPressed("click"))
+            else*/
+            if (!timer.IsStopped())
             {
-                /*
-                Vector2I cell = (Vector2I) GetGridPos(mousePos);
-                //GD.Print(GD.VarToStr(cell));
-                bool alive = aliveCells.ContainsKey(cell);
+
+                return;
+            }
+            if (Input.IsActionPressed("click"))
+            {
+
+                Vector2I pos = (Vector2I)GetGridPos(mousePos);
+                Cell cell;
+                cell.X = pos.X;
+                cell.Y = pos.Y;
+                bool alive = cellData.ContainsKey(cell);
                 if (!alive)
                 {
-                    aliveCells.Add(cell, true);
+                    cellData.Add(cell, ALIVE_MASK);
                 }
                 else
                 {
-                    aliveCells.Remove(cell);
+                    cellData.Remove(cell);
                 }
-                
+                EmitSignal("UpdateCell", cell.X, cell.Y, cellData.ContainsKey(cell));
             }
+        }
+            /*
             else if (Input.IsActionPressed("pan"))
             {
                 panning = true;
@@ -137,7 +152,7 @@ public partial class main : Node2D
             }
             
         }
-        //*/
+        */
         base._UnhandledInput(@event);
     }
 
@@ -241,20 +256,24 @@ public partial class main : Node2D
     public void _on_timer_timeout()//calls our needed funtions when we are processing 
 	{
        // GD.Print("Timer tick: " + stepsToRun + " " + playCount);
-        if(stepsToRun < 0 || playCount < stepsToRun)
+        if(stepsToRun <= 0 || playCount < stepsToRun)
         {
            
             UpdateAllCells();
             ++playCount;
         }
-        tickNumberLabel.Text = "" + playCount;
-        if (playCount >= stepsToRun && stepsToRun >= 0)
+        
+        if (playCount >= stepsToRun && stepsToRun > 0)
         {
             timer.Paused = true;
             timer.Stop();
             playButton.Disabled = false;
             saveButton.Disabled = false;
+            iterationsBox.Editable = true;
+            tickPSec.Editable = true;
+            stopButton.Disabled = true;
         }
+        tickNumberLabel.Text = "" + playCount;
         output.Text = printAliveCells();
 
     }
@@ -356,7 +375,10 @@ public partial class main : Node2D
         playCount = 0;
         timer.Paused = false;
         playButton.Disabled = true;
+        stopButton.Disabled = false;
         saveButton.Disabled = true;
+        tickPSec.Editable = false;
+        iterationsBox.Editable = false;
         timer.Start();
     }
 
@@ -377,15 +399,24 @@ public partial class main : Node2D
 
     public void _on_num_steps_value_changed(float numSteps)
     {
-        if (numSteps > 0)
-        {
-            stepsToRun = (int)numSteps;
-        }
+        stepsToRun = (int)numSteps;
     }
 
     public void _on_show_button_toggled(bool show)
     {
         hud.Visible = show;
+    }
+
+    public void _on_stop_button_pressed()
+    {
+        playButton.Disabled = false;
+        saveButton.Disabled = false;
+        tickPSec.Editable = true;
+        iterationsBox.Editable = true;
+        timer.Paused = true;
+        stopButton.Disabled = true;
+        timer.Stop();
+        output.Text = printAliveCells();
     }
 
     private string printAliveCells()

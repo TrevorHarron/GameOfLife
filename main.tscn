@@ -69,6 +69,19 @@ anchor_right = 0.431169
 anchor_bottom = 0.743034
 metadata/_edit_use_anchors_ = true
 
+[node name="StopButton" type="Button" parent="Camera/Control"]
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.593074
+anchor_top = 0.934985
+anchor_right = 0.630221
+anchor_bottom = 0.98339
+offset_right = 0.0949707
+offset_bottom = -0.270004
+disabled = true
+text = "Stop"
+metadata/_edit_use_anchors_ = true
+
 [node name="PlayButton" type="Button" parent="Camera/Control"]
 layout_mode = 1
 anchors_preset = -1
@@ -80,20 +93,19 @@ text = "Play"
 metadata/_edit_use_anchors_ = true
 
 [node name="StepsSec" type="SpinBox" parent="Camera/Control"]
-visible = false
 layout_mode = 1
 anchors_preset = -1
-anchor_left = -1.84763
-anchor_top = -0.0399982
-anchor_right = -1.77571
-anchor_bottom = 0.0141813
+anchor_left = -1.60434
+anchor_top = -0.0338062
+anchor_right = -1.53242
+anchor_bottom = 0.0203733
 offset_left = 2178.01
 offset_top = 621.839
 offset_right = 2178.01
 offset_bottom = 621.839
-min_value = 1.0
+min_value = 4.0
 max_value = 10.0
-value = 1.0
+value = 4.0
 metadata/_edit_use_anchors_ = true
 
 [node name="Ts" type="Label" parent="Camera/Control/StepsSec"]
@@ -105,15 +117,14 @@ text = "Steps/Sec: "
 metadata/_edit_use_anchors_ = true
 
 [node name="NumSteps" type="SpinBox" parent="Camera/Control"]
-visible = false
 layout_mode = 1
 anchors_preset = -1
 anchor_left = 0.167965
 anchor_top = 0.928793
 anchor_right = 0.239881
 anchor_bottom = 0.97678
-min_value = 1.0
-value = 1.0
+min_value = -1.0
+value = 10.0
 metadata/_edit_use_anchors_ = true
 
 [node name="Label2" type="Label" parent="Camera/Control/NumSteps"]
@@ -155,10 +166,10 @@ metadata/_edit_use_anchors_ = true
 
 [node name="LoadInput" type="Button" parent="Camera/Control"]
 layout_mode = 0
-offset_left = 6.0
-offset_top = 603.0
-offset_right = 129.0
-offset_bottom = 634.0
+offset_left = 15.0
+offset_top = 599.0
+offset_right = 138.0
+offset_bottom = 630.0
 text = "Load Input File"
 
 [node name="InputFile" type="Label" parent="Camera/Control/LoadInput"]
@@ -214,11 +225,12 @@ editable = false
 metadata/_edit_use_anchors_ = true
 
 [node name="TickNumber" type="Label" parent="Camera/Control"]
-layout_mode = 0
-anchor_left = 0.593939
-anchor_top = 0.947368
-anchor_right = 0.730736
-anchor_bottom = 0.982972
+layout_mode = 1
+anchors_preset = -1
+anchor_left = 0.65368
+anchor_top = 0.944272
+anchor_right = 0.790476
+anchor_bottom = 0.979876
 offset_left = -6.10352e-05
 offset_right = -6.10352e-05
 metadata/_edit_use_anchors_ = true
@@ -262,6 +274,7 @@ wait_time = 0.5
 [connection signal="UpdateCell" from="." to="World" method="_on_main_update_cell"]
 [connection signal="file_selected" from="Camera/Control/SaveFile" to="." method="_on_save_file_file_selected"]
 [connection signal="pressed" from="Camera/Control/Step" to="." method="_on_step_pressed"]
+[connection signal="pressed" from="Camera/Control/StopButton" to="." method="_on_stop_button_pressed"]
 [connection signal="pressed" from="Camera/Control/PlayButton" to="." method="_on_play_pressed"]
 [connection signal="value_changed" from="Camera/Control/StepsSec" to="." method="_on_steps_sec_value_changed"]
 [connection signal="value_changed" from="Camera/Control/NumSteps" to="." method="_on_num_steps_value_changed"]
