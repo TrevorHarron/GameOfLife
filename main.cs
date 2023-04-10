@@ -26,6 +26,7 @@ public partial class main : Node2D
 
     private TextEdit output;
     private TextEdit input;
+    private string fileName = "";
 
     private const string HEADER = "#Life 1.06";
     private const byte ALIVE_MASK = 16;
@@ -262,20 +263,26 @@ public partial class main : Node2D
     {
         cellData.Clear();
         EmitSignal("ClearWorld");
+        
         //update ui
         try
         {
+            if (String.IsNullOrEmpty(fileDir))
+            {
+                throw new Exception("No File Selected");
+            }
             string ext = fileDir.Split('.').Last();
             if(String.IsNullOrEmpty(ext) || !(ext.Match("txt",false) ||ext.Match("life") || ext.Match("lif"))){
                 throw new Exception("invlaid file type");
             }
+            fileName = fileDir;
             using (StreamReader file = new StreamReader(fileDir))
             {
                 StringBuilder sb = new StringBuilder();
                 
                 string h =file.ReadLine();//reading the header
                 sb.AppendLine(h);
-                GD.Print(h);
+                //GD.Print(h);
                 if(!h.Equals(HEADER))
                 {
                     throw new Exception("Not in Life 1.06 Format");
@@ -292,6 +299,7 @@ public partial class main : Node2D
                     sb.AppendLine(c.ToString());
                     //GD.Print(c.ToString());
                     cellData.Add(c, ALIVE_MASK);
+                    EmitSignal("UpdateCell", c.X, c.Y, cellData.ContainsKey(c));
                 }
                 file.Close();
 
@@ -308,7 +316,25 @@ public partial class main : Node2D
 
     public void _on_save_file_file_selected(string fileDir)
     {
+        try
+        {
+            using (StreamWriter file = new StreamWriter(fileDir))
+            {
+                file.Write(printAliveCells());
+                file.Close();
+            }
+        } 
+        catch (Exception e)
+        {
+            errorDialog.Title = e.Message;
+            errorDialog.Show();
+        }
+        
+    }
 
+    public void _on_reset_pressed()
+    {
+        _on_file_dialog_file_selected(fileName);
     }
 
     public void _on_load_input_pressed()
@@ -316,8 +342,17 @@ public partial class main : Node2D
         openDialog.Show();
     }
 
+    public void _on_save_output_pressed()
+    {
+        saveDialog.Show();
+    }
+
     public void _on_play_pressed()
     {
+        if (String.IsNullOrEmpty(fileName))
+        {
+            return;
+        }
         playCount = 0;
         timer.Paused = false;
         playButton.Disabled = true;
@@ -346,6 +381,11 @@ public partial class main : Node2D
         {
             stepsToRun = (int)numSteps;
         }
+    }
+
+    public void _on_show_button_toggled(bool show)
+    {
+        hud.Visible = show;
     }
 
     private string printAliveCells()
